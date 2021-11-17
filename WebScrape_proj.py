@@ -12,27 +12,35 @@ soup = BeautifulSoup(r.content, 'html.parser')
 
 
 
-def SAVE_TAGS():
-	pass
-
-
-def VIEW_SAVED_TAGS():
-	pass
-
 
 def GET_TAGS_LINKS():
-	Job_Titles = [Job_name for Job_name in soup.find_all('span')]
-	Company_name = []
-	for tag in lst:
-		tags = tag.get('title')
-		if tags != None:
-			print(tags)
+	Job_Titles = [Job_name.get('title') for Job_name in soup.find_all('span') if Job_name.get('title') != None]
+	Company_name = [com_name.get_text() for com_name in soup.find_all('span', {'class': 'companyName'})]
+	Company_Location = [Location.get_text() for Location in soup.find_all('div', {'class': 'companyLocation'})]
+	return Job_Titles, Company_name, Company_Location
+
+def return_zipped_list(lst=GET_TAGS_LINKS()):
+	lst1 = lst[0]
+	lst2 = lst[1]
+	lst3 = lst[2]
+	zip_all = zip(lst1, lst2, lst3)
+	return list(zip_all)
+
+def convert_to_dict(zipped_result):
+	dictt_result = collections.defaultdict(dict)
+	for jobname, company_name, companyLocation in zipped_result:
+		dictt_result[jobname] = company_name, companyLocation
+	return dictt_result
+
+def View_result(dict_result):
+	for k,v in dict_result.items():
+		print(f'||JOB TITLE:--{k}  ||COMPANY NAME:--{v[0]}  ||COMPANY LOCATION/TYPE:--{v[1]}' )
 
 def main():
-	if args.get == 'tags':
-		GET_TAGS_LINKS()
 	if args.get == 'view':
-		VIEW_SAVED_TAGS()
+		zipped_result = return_zipped_list()
+		dict_result = convert_to_dict(zipped_result)
+		print(View_result(dict_result))	
 
 if __name__ == "__main__":
 	main()
